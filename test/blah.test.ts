@@ -1,7 +1,7 @@
-import { sum } from '../src';
+import { AzureBlobClient } from '../src';
 
 describe('blah', () => {
   it('works', () => {
-    expect(sum(1, 1)).toEqual(2);
+    let client = new AzureBlobClient({blob_cs: "test_cs", managed_identity_toggle: false});
   });
 });

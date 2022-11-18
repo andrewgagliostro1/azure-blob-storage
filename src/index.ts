@@ -1,8 +1,7 @@
-import * as os from 'os';
-import { DataLakeFileClient, DataLakeServiceClient } from '@azure/storage-file-datalake';
+
+import { DataLakeServiceClient } from '@azure/storage-file-datalake';
 import { ChainedTokenCredential, DefaultAzureCredential, ManagedIdentityCredential } from '@azure/identity';
 import * as fs from "fs";
-import { readFile, writeFile } from 'fs/promises';
 
 export type clientInput = {
   blob_cs: string,
@@ -21,7 +20,7 @@ export class AzureBlobClient {
   constructor(input: clientInput) {
     this.blob_cs = input.blob_cs;
     this.managed_identity_toggle = input.managed_identity_toggle //os.environ.get("managed_identity");
-    
+
     if (this.managed_identity_toggle) {
       this.managed_identity = new ManagedIdentityCredential();
       this.credential_chain = new ChainedTokenCredential(this.managed_identity);
@@ -29,8 +28,8 @@ export class AzureBlobClient {
     }
   }
 
-  store_document(path_full: string, file_obj: File | null, fileSystemName: string) {
-    var datalake_service_client, dir_client, f, file_client, file_system_client, file_name, path_base;
+  public async store_document(path_full: string, file_obj: File | null, fileSystemName: string) {
+    var datalake_service_client, dir_client, file_client, file_system_client, file_name, path_base;
     path_base = path_full.split("/", 1)[0];
     file_name = path_full.split("/", 1)[1];
     datalake_service_client = DataLakeServiceClient.fromConnectionString(this.blob_cs);
@@ -54,8 +53,8 @@ export class AzureBlobClient {
     return true;
   }
 
-  fetch_document(path_full: string, fileSystemName: string) {
-    var download, file_client, path_base;
+  public async fetch_document(path_full: string, fileSystemName: string) {
+    var path_base;
     path_base = path_full.split("/", 1)[0];
     file_name = path_full.split("/", 1)[1];
     fs.mkdir(path_base, (err) => {
@@ -64,7 +63,7 @@ export class AzureBlobClient {
       }
       console.log('Directory created successfully!');
     });
-    var datalake_service_client, dir_client, f, file_client, file_system_client, file_name, path_base;
+    var datalake_service_client, dir_client, file_client, file_system_client, file_name;
 
     datalake_service_client = DataLakeServiceClient.fromConnectionString(this.blob_cs);
     file_system_client = datalake_service_client.getFileSystemClient(fileSystemName);
